@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+
 import { Header } from './components/Header';
 import { QueueTable } from './components/QueueTable';
 import { WaitingSection } from './components/WaitingSection';
@@ -27,7 +28,7 @@ export default function App() {
   const [scale, setScale] = useState(1);
   const boardRef = useRef<HTMLDivElement>(null);
 
-  // Scale the 1920px board to fit the actual viewport width
+  // Zoom the 1920px board to fit the actual viewport width
   useEffect(() => {
     const updateScale = () => setScale(window.innerWidth / DESIGN_WIDTH);
     updateScale();
@@ -57,27 +58,14 @@ export default function App() {
   );
 
   return (
-    // Outer wrapper: clips to viewport, sets height based on scaled content
-    <div
-      style={{ width: '100vw', height: `${100 / scale}vh`, overflow: 'hidden' }}
-    >
-      {/* Inner board: fixed 1920px, scaled down proportionally */}
-      <div
-        ref={boardRef}
-        style={{
-          width: DESIGN_WIDTH,
-          transformOrigin: 'top left',
-          transform: `scale(${scale})`,
-        }}
-        className="min-h-screen bg-white flex flex-col"
-      >
-        <Header time={formatClock(now)} />
-        <div className="p-8">
-          <QueueTable entries={sortedDepartures} now={now} />
-        </div>
-        <div className="px-8 pb-8">
-          <WaitingSection entries={initialWaitingData} now={now} />
-        </div>
+    // zoom scales both visually and in layout — no height clipping
+    <div ref={boardRef} style={{ zoom: scale, width: DESIGN_WIDTH }} className="bg-white flex flex-col">
+      <Header time={formatClock(now)} />
+      <div className="p-8">
+        <QueueTable entries={sortedDepartures} now={now} />
+      </div>
+      <div className="px-8 pb-8">
+        <WaitingSection entries={initialWaitingData} now={now} />
       </div>
     </div>
   );
