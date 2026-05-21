@@ -1,15 +1,16 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Header } from './components/Header';
 import { QueueTable } from './components/QueueTable';
 import { WaitingSection } from './components/WaitingSection';
 import { initialDepartureData, initialWaitingData } from './data/mockData';
 import type { DepartureEntry } from './types';
 
+const DESIGN_WIDTH = 1920;
+
 function formatClock(d: Date): string {
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
-// Rebuild departure times relative to a new base (for cycling demo)
 function rebuildDepartures(template: DepartureEntry[]): DepartureEntry[] {
   const base = new Date();
   base.setSeconds(0, 0);
@@ -23,6 +24,16 @@ function rebuildDepartures(template: DepartureEntry[]): DepartureEntry[] {
 export default function App() {
   const [now, setNow] = useState(() => new Date());
   const [departures, setDepartures] = useState<DepartureEntry[]>(initialDepartureData);
+  const [scale, setScale] = useState(1);
+  const boardRef = useRef<HTMLDivElement>(null);
+
+  // Scale the 1920px board to fit the actual viewport width
+  useEffect(() => {
+    const updateScale = () => setScale(window.innerWidth / DESIGN_WIDTH);
+    updateScale();
+    window.addEventListener('resize', updateScale);
+    return () => window.removeEventListener('resize', updateScale);
+  }, []);
 
   const reload = useCallback(() => {
     setDepartures(rebuildDepartures(initialDepartureData));
@@ -34,7 +45,6 @@ export default function App() {
       setNow(current);
       setDepartures(prev => {
         const remaining = prev.filter(e => e.departureTime.getTime() > current.getTime());
-        // Auto-reload when queue is empty so the demo keeps running
         if (remaining.length === 0) return rebuildDepartures(initialDepartureData);
         return remaining;
       });
@@ -42,23 +52,32 @@ export default function App() {
     return () => clearInterval(tick);
   }, [reload]);
 
-  // Always display sorted by nearest departure first
   const sortedDepartures = [...departures].sort(
     (a, b) => a.departureTime.getTime() - b.departureTime.getTime()
   );
 
   return (
-    <div className="w-[1920px] min-h-screen bg-white flex flex-col">
-      <Header time={formatClock(now)} />
-
-      {/* Departure queue */}
-      <div className="p-8">
-        <QueueTable entries={sortedDepartures} now={now} />
-      </div>
-
-      {/* Waiting section */}
-      <div className="px-8 pb-8">
-        <WaitingSection entries={initialWaitingData} now={now} />
+    // Outer wrapper: clips to viewport, sets height based on scaled content
+    <div
+      style={{ width: '100vw', height: `${100 / scale}vh`, overflow: 'hidden' }}
+    >
+      {/* Inner board: fixed 1920px, scaled down proportionally */}
+      <div
+        ref={boardRef}
+        style={{
+          width: DESIGN_WIDTH,
+          transformOrigin: 'top left',
+          transform: `scale(${scale})`,
+        }}
+        className="min-h-screen bg-white flex flex-col"
+      >
+        <Header time={formatClock(now)} />
+        <div className="p-8">
+          <QueueTable entries={sortedDepartures} now={now} />
+        </div>
+        <div className="px-8 pb-8">
+          <WaitingSection entries={initialWaitingData} now={now} />
+        </div>
       </div>
     </div>
   );
