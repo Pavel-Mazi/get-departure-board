@@ -3,8 +3,9 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Header } from './components/Header';
 import { QueueTable } from './components/QueueTable';
 import { WaitingSection } from './components/WaitingSection';
+import { TheoryBar } from './components/TheoryBar';
 import { initialDepartureData, initialWaitingData } from './data/mockData';
-import type { DepartureEntry } from './types';
+import type { DepartureEntry, TheoryFlags } from './types';
 
 const DESIGN_WIDTH = 1920;
 
@@ -28,16 +29,20 @@ export default function App() {
   const [scale, setScale] = useState(1);
   const boardRef = useRef<HTMLDivElement>(null);
 
-  // Zoom the 1920px board to fit the actual viewport width
+  const [theories, setTheories] = useState<TheoryFlags>({
+    badgesInRouteColumn: false,
+    shortRouteCode: false,
+  });
+
+  const toggleTheory = useCallback((key: keyof TheoryFlags) => {
+    setTheories(prev => ({ ...prev, [key]: !prev[key] }));
+  }, []);
+
   useEffect(() => {
     const updateScale = () => setScale(window.innerWidth / DESIGN_WIDTH);
     updateScale();
     window.addEventListener('resize', updateScale);
     return () => window.removeEventListener('resize', updateScale);
-  }, []);
-
-  const reload = useCallback(() => {
-    setDepartures(rebuildDepartures(initialDepartureData));
   }, []);
 
   useEffect(() => {
@@ -51,22 +56,26 @@ export default function App() {
       });
     }, 1000);
     return () => clearInterval(tick);
-  }, [reload]);
+  }, []);
 
   const sortedDepartures = [...departures].sort(
     (a, b) => a.departureTime.getTime() - b.departureTime.getTime()
   );
 
   return (
-    // zoom scales both visually and in layout — no height clipping
     <div ref={boardRef} style={{ zoom: scale, width: DESIGN_WIDTH }} className="bg-white flex flex-col">
       <Header time={formatClock(now)} />
+
       <div className="p-8">
-        <QueueTable entries={sortedDepartures} now={now} />
+        <QueueTable entries={sortedDepartures} now={now} theories={theories} />
       </div>
+
       <div className="px-8 pb-8">
         <WaitingSection entries={initialWaitingData} now={now} />
       </div>
+
+      {/* Theory switcher — for internal testing only */}
+      <TheoryBar flags={theories} onToggle={toggleTheory} />
     </div>
   );
 }

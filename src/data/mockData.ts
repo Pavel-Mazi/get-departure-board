@@ -16,6 +16,7 @@ export const initialDepartureData: DepartureEntry[] = [
       { label: 'Сокращенная трасса', variant: 'yellow' },
     ],
     modifiedRoute: 'Ст. метро «Старая Деревня» — ПТО «Шаврова»',
+    modifiedRouteCode: 'С',
     departureTime: addMinutes(base, 1),
   },
   {
@@ -57,6 +58,7 @@ export const initialDepartureData: DepartureEntry[] = [
       { label: 'Сокращенная трасса', variant: 'yellow' },
     ],
     modifiedRoute: 'ПТО «Шаврова» — пр. Испытателей',
+    modifiedRouteCode: 'Б',
     departureTime: addMinutes(base, 7),
   },
   {
@@ -78,6 +80,7 @@ export const initialDepartureData: DepartureEntry[] = [
       { label: 'Измененная трасса', variant: 'blue' },
     ],
     modifiedRoute: 'Ст. метро «Старая Деревня» — ул. Савушкина',
+    modifiedRouteCode: 'С',
     departureTime: addMinutes(base, 11),
   },
   {
@@ -98,6 +101,8 @@ export const initialDepartureData: DepartureEntry[] = [
       { label: 'Маршрут', variant: 'gray' },
       { label: 'Измененная трасса', variant: 'blue' },
     ],
+    modifiedRoute: 'пр. Декабристов — ст. метро «Нарвская»',
+    modifiedRouteCode: 'И',
     departureTime: addMinutes(base, 17),
   },
   {
@@ -109,6 +114,7 @@ export const initialDepartureData: DepartureEntry[] = [
       { label: 'Сокращенная трасса', variant: 'yellow' },
     ],
     modifiedRoute: 'пр. Испытателей — ПТО «Шаврова»',
+    modifiedRouteCode: 'Б',
     departureTime: addMinutes(base, 22),
   },
 ];

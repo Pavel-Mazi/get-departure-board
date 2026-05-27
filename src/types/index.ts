@@ -11,8 +11,15 @@ export interface DepartureEntry {
   vehicleNumber: string;
   routeName: string;
   badges: StatusBadgeData[];
-  modifiedRoute?: string;
+  modifiedRoute?: string;      // full text: «Ст. метро — ПТО «Шаврова»»
+  modifiedRouteCode?: string;  // short code for theory B: «С», «Б» etc.
   departureTime: Date;
+}
+
+// Which UI theory variants are active
+export interface TheoryFlags {
+  badgesInRouteColumn: boolean;  // Theory A: move badges → "Измененная трасса" column
+  shortRouteCode: boolean;       // Theory B: show single-letter code instead of full route text
 }
 
 export interface WaitingEntry {
